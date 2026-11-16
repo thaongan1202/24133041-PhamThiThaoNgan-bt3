@@ -7,6 +7,8 @@
 </head>
 <body>
     <h2>ShoppingJPA</h2>
+    <a href="${pageContext.request.contextPath}/video">Xem video</a> |
+    <a href="${pageContext.request.contextPath}/multiPartServlet">Upload file</a> |
     <a href="${pageContext.request.contextPath}/login">Đăng nhập</a> |
     <a href="${pageContext.request.contextPath}/register">Đăng ký</a> |
     <a href="${pageContext.request.contextPath}/admin/categories">Danh mục</a>

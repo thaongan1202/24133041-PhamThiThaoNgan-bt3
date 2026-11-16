@@ -3,6 +3,8 @@ package vn.iotstar.entity;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -55,6 +58,9 @@ public class User implements Serializable {
 
     @Column(name = "otpexpiry")
     private LocalDateTime otpExpiry;
+
+    @OneToMany(mappedBy = "user")
+    private List<Video> videos = new ArrayList<>();
     
     public boolean isActive() {
 		return active;
@@ -78,6 +84,14 @@ public class User implements Serializable {
 
 	public void setOtpExpiry(LocalDateTime otpExpiry) {
 		this.otpExpiry = otpExpiry;
+	}
+
+	public List<Video> getVideos() {
+		return videos;
+	}
+
+	public void setVideos(List<Video> videos) {
+		this.videos = videos;
 	}
 
     public User() {

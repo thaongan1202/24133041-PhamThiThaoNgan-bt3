@@ -1,6 +1,7 @@
 package vn.iotstar.entity;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.NamedQuery;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
@@ -38,6 +40,13 @@ public class Video implements Serializable {
     @ManyToOne
     @JoinColumn(name = "CategoryId")
     private Category category;
+
+    @ManyToOne
+    @JoinColumn(name = "UserId")
+    private User user;
+
+    @Column(name = "CreatedDate")
+    private LocalDateTime createdDate;
 
     public Video() {
     }
@@ -96,6 +105,29 @@ public class Video implements Serializable {
 
 	public void setCategory(Category category) {
 		this.category = category;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public LocalDateTime getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setCreatedDate(LocalDateTime createdDate) {
+		this.createdDate = createdDate;
+	}
+
+	@PrePersist
+	private void setCreatedDateIfMissing() {
+		if (createdDate == null) {
+			createdDate = LocalDateTime.now();
+		}
 	}
 
 	public static long getSerialversionuid() {
