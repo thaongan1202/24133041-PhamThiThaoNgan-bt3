@@ -1,7 +1,8 @@
 package vn.iotstar.controller;
 
 import java.io.IOException;
-
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -62,7 +63,9 @@ public class RegisterController extends HttpServlet {
             return;
         }
 
-        resp.sendRedirect(req.getContextPath() + "/login?registered=true");
+        boolean sent = service.sendOtp(email, "Kích hoạt tài khoản ShoppingJPA");
+        String encoded = URLEncoder.encode(email, StandardCharsets.UTF_8);
+        resp.sendRedirect(req.getContextPath() + "/verify?email=" + encoded + (sent ? "" : "&sent=false"));
     }
 
     private boolean isBlank(String s) {

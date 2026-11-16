@@ -1,6 +1,7 @@
 package vn.iotstar.entity;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 import jakarta.persistence.Column;
@@ -45,6 +46,39 @@ public class User implements Serializable {
 
     @Column(name = "createddate")
     private LocalDate createddate;
+
+    @Column(name = "active")
+    private boolean active;
+
+    @Column(name = "otp", columnDefinition = "nvarchar(10) null")
+    private String otp;
+
+    @Column(name = "otpexpiry")
+    private LocalDateTime otpExpiry;
+    
+    public boolean isActive() {
+		return active;
+	}
+
+	public void setActive(boolean active) {
+		this.active = active;
+	}
+
+	public String getOtp() {
+		return otp;
+	}
+
+	public void setOtp(String otp) {
+		this.otp = otp;
+	}
+
+	public LocalDateTime getOtpExpiry() {
+		return otpExpiry;
+	}
+
+	public void setOtpExpiry(LocalDateTime otpExpiry) {
+		this.otpExpiry = otpExpiry;
+	}
 
     public User() {
     }

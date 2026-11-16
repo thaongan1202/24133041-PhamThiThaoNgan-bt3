@@ -1,11 +1,16 @@
 package vn.iotstar.service.impl;
 
+import java.security.SecureRandom;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import org.mindrot.jbcrypt.BCrypt;
 
 import vn.iotstar.dao.IUserDao;
 import vn.iotstar.dao.UserDao;
 import vn.iotstar.entity.User;
 import vn.iotstar.service.IUserService;
+import vn.iotstar.util.MailUtil;
 
 public class UserServiceImpl implements IUserService {
     private IUserDao userDao = new UserDao();
@@ -13,7 +18,18 @@ public class UserServiceImpl implements IUserService {
     @Override
     public User login(String username, String password) {
         User user = findByUsername(username);
-        if (user != null && password.equals(user.getPassword())) {
+        if (user == null) {
+            return null;
+        }
+
+        String stored = user.getPassword();
+        if (stored.startsWith("$2")) {
+            return BCrypt.checkpw(password, stored) ? user : null;
+        }
+
+        if (stored.equals(password)) {
+            user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+            userDao.update(user);
             return user;
         }
         return null;
@@ -31,14 +47,68 @@ public class UserServiceImpl implements IUserService {
         }
         User user = new User();
         user.setUsername(username);
-        user.setPassword(password);
+        user.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
         user.setEmail(email);
         user.setFullname(fullname);
         user.setPhone(phone);
         user.setRoleid(5);
+        user.setActive(false);
         user.setCreateddate(LocalDate.now());
         userDao.insert(user);
         return true;
+    }
+
+    @Override
+    public boolean sendOtp(String email, String subject) {
+        User user = userDao.findByEmail(email);
+        if (user == null) {
+            return false;
+        }
+
+        String otp = String.format("%06d", new SecureRandom().nextInt(1_000_000));
+        user.setOtp(otp);
+        user.setOtpExpiry(LocalDateTime.now().plusMinutes(5));
+        userDao.update(user);
+
+        System.out.println("OTP của " + email + ": " + otp);
+        try {
+            MailUtil.send(email, subject, "Mã OTP của bạn là: " + otp + "\nMã có hiệu lực trong 5 phút.");
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean activate(String email, String otp) {
+        User user = userDao.findByEmail(email);
+        if (!otpValid(user, otp)) {
+            return false;
+        }
+        user.setActive(true);
+        user.setOtp(null);
+        user.setOtpExpiry(null);
+        userDao.update(user);
+        return true;
+    }
+
+    @Override
+    public boolean resetPassword(String email, String otp, String newPassword) {
+        User user = userDao.findByEmail(email);
+        if (!otpValid(user, otp)) {
+            return false;
+        }
+        user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+        user.setOtp(null);
+        user.setOtpExpiry(null);
+        userDao.update(user);
+        return true;
+    }
+
+    private boolean otpValid(User user, String otp) {
+        return user != null && otp != null && otp.equals(user.getOtp())
+                && user.getOtpExpiry() != null && LocalDateTime.now().isBefore(user.getOtpExpiry());
     }
 
     @Override

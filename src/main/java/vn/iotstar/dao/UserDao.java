@@ -67,4 +67,37 @@ public class UserDao implements IUserDao {
             em.close();
         }
     }
+    
+    
+    @Override
+    public void update(User user) {
+        EntityManager em = JpaConfig.getEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        try {
+            trans.begin();
+            em.merge(user);
+            trans.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw e;
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public User findByEmail(String email) {
+        EntityManager em = JpaConfig.getEntityManager();
+        try {
+            TypedQuery<User> query = em.createQuery("SELECT u FROM User u WHERE u.email = :email", User.class);
+            query.setParameter("email", email);
+            List<User> list = query.getResultList();
+            return list.isEmpty() ? null : list.get(0);
+        } finally {
+            em.close();
+        }
+    }
 }
