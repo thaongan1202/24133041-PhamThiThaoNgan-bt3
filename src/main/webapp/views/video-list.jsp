@@ -17,7 +17,7 @@
 </head>
 <body>
     <p><a href="<c:url value='/home'/>">Trang chủ</a></p>
-    <h1>Tất cả video</h1>
+    <h1>Video của tôi</h1>
     <c:if test="${empty videos}"><p>Chưa có video đang hoạt động.</p></c:if>
     <div class="videos">
         <c:forEach items="${videos}" var="video">

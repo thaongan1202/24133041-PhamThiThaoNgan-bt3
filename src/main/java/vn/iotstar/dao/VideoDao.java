@@ -143,6 +143,32 @@ public class VideoDao implements IVideoDao {
             em.close();
         }
     }
+    @Override
+    public List<Video> findByUser(int userId, int page, int pageSize) {
+        EntityManager em = JpaConfig.getEntityManager();
+        try {
+            TypedQuery<Video> query = em.createQuery(
+                    "SELECT v FROM Video v WHERE v.user.id = :uid ORDER BY v.createdDate DESC, v.videoId DESC",
+                    Video.class);
+            query.setParameter("uid", userId);
+            query.setFirstResult(Math.max(0, page - 1) * pageSize);
+            query.setMaxResults(pageSize);
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    @Override
+    public int countByUser(int userId) {
+        EntityManager em = JpaConfig.getEntityManager();
+        try {
+            return em.createQuery("SELECT COUNT(v) FROM Video v WHERE v.user.id = :uid", Long.class)
+                    .setParameter("uid", userId).getSingleResult().intValue();
+        } finally {
+            em.close();
+        }
+    }
 
     @Override
     public void incrementViews(String videoId) {

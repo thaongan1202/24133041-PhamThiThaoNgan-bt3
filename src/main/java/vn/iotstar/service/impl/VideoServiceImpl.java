@@ -54,9 +54,21 @@ public class VideoServiceImpl implements IVideoService {
     public int countActive() {
         return videoDao.countActive();
     }
+    
+    @Override
+    public List<Video> findByUser(int userId, int page, int pageSize) {
+        return videoDao.findByUser(userId, page, pageSize);
+    }
+
+    @Override
+    public int countByUser(int userId) {
+        return videoDao.countByUser(userId);
+    }
 
     @Override
     public void incrementViews(String videoId) {
         videoDao.incrementViews(videoId);
     }
+    
+    
 }

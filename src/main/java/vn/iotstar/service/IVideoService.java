@@ -15,4 +15,7 @@ public interface IVideoService {
     int count();
     int countActive();
     void incrementViews(String videoId);
+    
+    List<Video> findByUser(int userId, int page, int pageSize);
+    int countByUser(int userId);
 }

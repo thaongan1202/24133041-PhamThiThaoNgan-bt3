@@ -107,12 +107,16 @@ public class VideoController extends HttpServlet {
 
     private void showVideoPage(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        int totalVideos = videoService.countActive();
+        User user = getLoggedInUser(req);
+        if (user == null) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+        int totalVideos = videoService.countByUser(user.getId());
         int totalPages = Math.max(1, (int) Math.ceil(totalVideos / (double) PAGE_SIZE));
-        int page = parsePage(req.getParameter("page"));
-        page = Math.min(page, totalPages);
+        int page = Math.min(parsePage(req.getParameter("page")), totalPages);
 
-        req.setAttribute("videos", videoService.findActive(page, PAGE_SIZE));
+        req.setAttribute("videos", videoService.findByUser(user.getId(), page, PAGE_SIZE));
         req.setAttribute("page", page);
         req.setAttribute("totalPages", totalPages);
         req.getRequestDispatcher("/views/video-list.jsp").forward(req, resp);
@@ -121,7 +125,10 @@ public class VideoController extends HttpServlet {
     private void showVideo(HttpServletRequest req, HttpServletResponse resp, String videoId)
             throws ServletException, IOException {
         Video video = videoService.findById(videoId);
-        if (video == null || video.getActive() != 1) {
+        User current = getLoggedInUser(req);
+        boolean owner = current != null && video != null && video.getUser() != null
+                && video.getUser().getId() == current.getId();
+        if (video == null || (video.getActive() != 1 && !owner)) {
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
